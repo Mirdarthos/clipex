@@ -1,7 +1,7 @@
 #! /usr/bin/bash
 # A script that utlizes ffmpeg to extract video clips from a video.
 # Version 1.0
-# I use mainly .mkv containers so this is mainoly for that. I might expand it, or I might not.
+# I use mainly .mkv containers so this is mainly for that. I might expand it, or I might not.
 # We'll see.
 # As far as I'm aware, the scfript uses the same video and auidio codec settings as in the
 # original file. This is by design, because I tried and failed to set manual setttings that
@@ -13,10 +13,10 @@
 # - bc
 # - awk
 FILENAME="${0}"
-options="c:o:i:ktshq"
-long_options="clip:,outputdirectory:,input:,addkeyframes,tmpdir:,help,quiet,silent,noerrors"
+PARAMATERS="c:o:i:ktshq"
+LONG_PARAMATERS="clip:,outputdirectory:,input:,addkeyframes,tmpdir:,help,quiet,silent,noerrors"
 # Parse command line options
-parsed_options=$(getopt --options $options --longoptions $long_options -- "$@")
+parsed_options=$(getopt --options "${PARAMATERS}" --longoptions "${LONG_PARAMATERS}" -- "$@")
 RETURN_VALUE=$?
 # Check for errors in parsing
 if [ "${RETURN_VALUE}" -ne "0" ]; then
