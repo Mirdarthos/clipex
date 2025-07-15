@@ -44,7 +44,7 @@ fi
 
 function help() {
     if [ "${1}" == 'long' ]; then
-        echo "${FILENAME} was created by Mirdarthos, cobbled together in less than a week."
+        echo "${FILENAME} was created by Mirdarthos, cobbled together in about a week."
         echo "Feel free to do with it what you want, except using to to harm or cause harm"
         echo "to others. See also: https://firstdonoharm.dev"
         echo
