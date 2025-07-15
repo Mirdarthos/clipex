@@ -28,9 +28,6 @@ eval set -- "$parsed_options"
 function timestampToSeconds() {
     awk -F: 'NF==3 { print ($1 * 3600) + ($2 * 60) + $3 } NF==2 { print ($1 * 60) + $2 } NF==1 { print 0 + $1 }' <<< "${1}"
 }
-bcr() {
-    echo "scale=${2}+1;t=${1};scale-=1;(t*10^scale+((t>0)-(t<0))/2)/10^scale" | bc -l
-}
 
 if [[ $# -lt 2 ]] && [[ ! $* =~ "-h" ]] && [[ ! $* =~ "--help" ]]; then
     if [[ $# -eq 0 ]]; then
