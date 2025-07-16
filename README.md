@@ -17,7 +17,7 @@ bash /path/to/clipex.sh [-q] [-s] --clip 00:05:38-00:07:47 --clip 00:07:49-00:09
 **Or** if you prefer you can download it to `$HOME/.local/bin`, or in fact any directory that's in your `$PATH`, enter the directory:
 
 ```
-cd #HOME/.local/bin
+cd $HOME/.local/bin
 ```
 
 Set the newly downloaded script as executable:
