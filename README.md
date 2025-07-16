@@ -1,4 +1,4 @@
-This script is the result of inspiration foun in this Stack Overflow answer:
+This script is the result of inspiration found in this Stack Overflow answer:
 
 https://stackoverflow.com/questions/18444194/cutting-multimedia-files-based-on-start-and-end-time-using-ffmpeg/52916510#52916510
 
