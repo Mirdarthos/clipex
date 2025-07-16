@@ -97,7 +97,7 @@ while true; do
             shift 2 # past value
         ;;
         -o|--outputdirectory)
-            OUTPUTDIR=$(realpath -s "${2}")
+            OUTPUTDIR=$(realpath --no-symlinks "${2}")
             shift 2 # past value
         ;;
         -i|--input)
@@ -109,7 +109,7 @@ while true; do
             shift
         ;;
         -t|--tmpdir)
-            TMPSTORAGEDIR=$(realpath -s "${2}")
+            TMPSTORAGEDIR=$(realpath --no-symlinks "${2}")
             shift 2 # past value
         ;;
         -q|--quiet)
