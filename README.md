@@ -2,9 +2,9 @@ This script is the result of inspiration found in this Stack Overflow answer:
 
 https://stackoverflow.com/questions/18444194/cutting-multimedia-files-based-on-start-and-end-time-using-ffmpeg/52916510#52916510
 
-This method beccause it was the only one vouched for by the answerer, giving jmee quite a bit or confidence in it. So I wanted to convert it to a script so that I'm able to use it easily. This quickly morphed into this script, which is a bit diffrent from what I set out to do, but I think it'sa beautiful nontheless.
+This method beccause it was the only one vouched for by the answerer, giving me quite a bit or confidence in it. So I wanted to convert it to a script so that I'm able to use it easily. This quickly morphed into this script, which is a bit diffrent from what I set out to do, but I think it's beautiful nontheless.
 
-It allows, or helps the user to extract one or more video clips from a larger video using, well I think it's obvious, but it uses `ffmpeg`, without having to buld long and complicated `ffmpeg` commands...wich can be quite hard, especially if you're _new to it_, like me. It also allows you to force keyframes (I presume thiss means insert keyframes) into the video at the locations specified with `--clip`.
+It allows, or helps the user to extract one or more video clips from a larger video using, well I think it's obvious, but it uses `ffmpeg`, without having to buld long and complicated `ffmpeg` commands...wich can be quite hard, especially if you're _new to it_, like me. It also allows you to force keyframes (I presume this means insert keyframes) into the video at the locations specified with `--clip`.
 
 Installation and usage:
 
