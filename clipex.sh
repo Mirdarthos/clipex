@@ -14,7 +14,7 @@
 # - awk
 FILENAME="${0}"
 PARAMATERS="c:o:i:ktshq"
-LONG_PARAMATERS="clip:,outputdirectory:,input:,addkeyframes,tmpdir:,help,quiet,silent,noerrors"
+LONG_PARAMATERS="clip:,outputdirectory:,input:,addkeyframes,tmpdir:,help,quiet,silent,noerrors,nvidia:"
 # Parse command line options
 parsed_options=$(getopt --options "${PARAMATERS}" --longoptions "${LONG_PARAMATERS}" -- "$@")
 RETURN_VALUE=$?
@@ -41,7 +41,9 @@ fi
 
 function help() {
     if [ "${1}" == 'long' ]; then
-        echo "${FILENAME} was created by Mirdarthos, cobbled together in about a week."
+        echo "${FILENAME} was created by Mirdarthos, originally cobbled together in about"
+        echo "a week. I kept tinkering afterwards, though, so have lost track of time"
+        echo "spent on it."
         echo "Feel free to do with it what you want, except using to to harm or cause harm"
         echo "to others. See also: https://firstdonoharm.dev"
         echo
@@ -53,6 +55,9 @@ function help() {
         echo "  -i, --input              The full path to the video from which the clipps should be extracted."
         echo "  -k, --addkeyframes       Add keyframes at the timestamps specified with -c, or --clips before"
         echo "                           starting the extraction progress."
+        echo "  --nvidia <param>         Use the <param> nvidia encoder to do the job."
+        echo "                           a List of nvidia coders that can be used is available in the second"
+        echo "                           column of the output of command 'ffmpeg -encoders | grep NVIDIA'."
         echo "  -q, --quiet              Be less verbose with the output, although not completely silent."
         echo "                           This effectively silences ffmpeg."
         echo "  -s, --silent             Don't print anything but errors to the terminal."
@@ -68,7 +73,8 @@ function help() {
         echo "  -o, --outputdirectory    The directory in which the clips should be saved."
         echo "  -i, --input              The full path to the video from which the clipps should be extracted."
         echo "  -k, --addkeyframes       Add keyframes at the timestamps specified with -c, or --clips before"
-        echo "                           starting the extraction progress."
+        echo "                           starting the extraction progress."r
+        echo "  --nvidia <param>         Use the <param> nvidia encoder to do the job."
         echo "  -q, --quiet              Be less verbose with the output, although not completely silent."
         echo "  -s, --silent             Don't print anything but errors to the terminal."
         echo "      --noerrors           Do not print any errors to the terminal."
@@ -113,6 +119,10 @@ while true; do
             ARG=$(tr -d '\0' <<<"${2}")
             TMPSTORAGEDIR=$(realpath --no-symlinks --zero "${ARG}")
             shift 2 # past value
+        ;;
+        --nvidia)
+            ENCODER="${2}"
+            shift 2
         ;;
         -q|--quiet)
             QUIETOUTPUT=true
@@ -199,10 +209,10 @@ if [ "${ADDKEYFRAMES}" == true ]; then
         printf "%sAdding keyframes to the file before extracting process can begin.%s\n" "${TEXTFORMATTING[BRIGHT]}${TEXTFORMATTING[GREEN]}" "${TEXTFORMATTING[NORMAL]}"
     fi
     if [ -d "${TMPSTORAGEDIR}" ]  && [ -w "${TMPSTORAGEDIR}" ]; then
-        ffmpeg ${QUIETOUTPUT:+-loglevel warning} -hide_banner -i "${INPUTFILEPATH}" -force_key_frames "${KEYFRAMETIMESTAMPS}" "${TMPSTORAGEDIR}/$(basename "${INPUTFILEPATH}")"
+        ffmpeg ${QUIETOUTPUT:+-loglevel warning} -hide_banner -i "${INPUTFILEPATH}" ${ENCODER:+-c:v $ENCODER} -force_key_frames "${KEYFRAMETIMESTAMPS}" "${TMPSTORAGEDIR}/$(basename "${INPUTFILEPATH}")"
         RETURN_RESULT=$?
     else
-        if ffmpeg ${QUIETOUTPUT:+-loglevel warning} -hide_banner -i "${INPUTFILEPATH}" -force_key_frames "${KEYFRAMETIMESTAMPS}" -y "/tmp/$(basename "${INPUTFILEPATH}")"; then
+        if ffmpeg ${QUIETOUTPUT:+-loglevel warning} -hide_banner -i "${INPUTFILEPATH}" ${ENCODER:+-c:v $ENCODER} -force_key_frames "${KEYFRAMETIMESTAMPS}" -y "/tmp/$(basename "${INPUTFILEPATH}")"; then
             if [ ! "${SILENT}" == true ]; then
                 printf "%sReplacing ${INPUTFILEPATH} with /tmp/$(basename "${INPUTFILEPATH}")...%s\n" "${TEXTFORMATTING[BRIGHT]}${TEXTFORMATTING[YELLOW]}" "${TEXTFORMATTING[NORMAL]}"
             fi
@@ -238,7 +248,7 @@ for clipTimes in "${TIMESTAMPSTOEXTRACT[@]}"; do
         clipStartSeconds=$(timestampToSeconds "${clipStart}")
         clipEndSeconds=$(timestampToSeconds "${clipEnd}")
         clipDuration=$(bc <<< "(${clipEndSeconds} + 0.01) - ${clipStartSeconds}" | awk '{ printf "%.4f", $0 }')
-        if ffmpeg ${QUIETOUTPUT:+-loglevel warning} -hide_banner -ss "${clipStartSeconds}" -i "${TMPSTORAGEDIR}/$(basename "${INPUTFILEPATH}")" -t "${clipDuration}" "${OUTPUTDIR}/${CLIPNO}.mkv"; then
+        if ffmpeg ${QUIETOUTPUT:+-loglevel warning} -hide_banner -ss "${clipStartSeconds}" -i "${TMPSTORAGEDIR}/$(basename "${INPUTFILEPATH}")" ${ENCODER:+-c:v $ENCODER} -t "${clipDuration}" "${OUTPUTDIR}/${CLIPNO}.mkv"; then
             EXTRACTIONMESSAGES+=("Clip #${CLIPNO}: ${OUTPUTDIR}/${CLIPNO}.mkv was successfully extracted from ${INPUTFILEPATH}")
         else
             EXTRACTIONERRORMESSAGES+=("Clip #${CLIPNO}: There were one or more errors while attempting to extract ${OUTPUTDIR}/${CLIPNO}.mkv from ${INPUTFILEPATH}. ffmpeg returned an $? error code.")
@@ -269,7 +279,7 @@ for clipTimes in "${TIMESTAMPSTOEXTRACT[@]}"; do
             printf "%s\n" "${CLIPMESSAGE}"
         fi
 
-        if ffmpeg ${QUIETOUTPUT:+-loglevel warning} -hide_banner -ss "${clipStartSeconds}" -i "${INPUTFILEPATH}" -t "${clipDuration}" "${OUTPUTDIR}/${CLIPNO}.mkv"; then
+        if ffmpeg ${QUIETOUTPUT:+-loglevel warning} -hide_banner -ss "${clipStartSeconds}" -i "${INPUTFILEPATH}" ${ENCODER:+-c:v $ENCODER} -t "${clipDuration}" "${OUTPUTDIR}/${CLIPNO}.mkv"; then
             if [ ! "${SILENT}" == true ]; then
                 EXTRACTIONMESSAGES+=("Clip #${CLIPNO}: ${OUTPUTDIR}/${CLIPNO}.mkv was successfully extracted from \"$(basename "${INPUTFILEPATH}")\".")
             fi
