@@ -97,7 +97,8 @@ while true; do
             shift 2 # past value
         ;;
         -o|--outputdirectory)
-            OUTPUTDIR=$(realpath --no-symlinks --zero "${2}")
+            ARG=$(tr -d '\0' <<<"${2}")
+            OUTPUTDIR=$(realpath --no-symlinks --zero "${ARG}")            
             shift 2 # past value
         ;;
         -i|--input)
