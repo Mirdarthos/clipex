@@ -110,7 +110,8 @@ while true; do
             shift
         ;;
         -t|--tmpdir)
-            TMPSTORAGEDIR=$(realpath --no-symlinks --zero "${2}")
+            ARG=$(tr -d '\0' <<<"${2}")
+            TMPSTORAGEDIR=$(realpath --no-symlinks --zero "${ARG}")
             shift 2 # past value
         ;;
         -q|--quiet)
