@@ -58,6 +58,8 @@ function help() {
         echo "  --nvidia <param>         Use the <param> nvidia encoder to do the job."
         echo "                           a List of nvidia coders that can be used is available in the second"
         echo "                           column of the output of command 'ffmpeg -encoders | grep NVIDIA'."
+        echo "                           Currently only the 'h264_nvenc' hardware encoder works and it's not"
+        echo "                           really customizable."
         echo "  -q, --quiet              Be less verbose with the output, although not completely silent."
         echo "                           This effectively silences ffmpeg."
         echo "  -s, --silent             Don't print anything but errors to the terminal."
