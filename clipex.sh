@@ -103,7 +103,7 @@ while true; do
             shift 2 # past value
         ;;
         -o|--outputdirectory)
-            OUTPUTDIR=$(realpath --no-symlinks "${ARG}")
+            OUTPUTDIR=$(realpath --no-symlinks "${2}")
             shift 2 # past value
         ;;
         -i|--input)
@@ -115,7 +115,7 @@ while true; do
             shift
         ;;
         -t|--tmpdir)
-            TMPSTORAGEDIR=$(realpath --no-symlinks "${ARG}")
+            TMPSTORAGEDIR=$(realpath --no-symlinks "${2}")
             shift 2 # past value
         ;;
         --nvidia)
