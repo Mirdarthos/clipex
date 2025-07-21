@@ -47,7 +47,7 @@ function help() {
         echo "Feel free to do with it what you want, except using to harm or cause harm to"
         echo "others. See also: https://firstdonoharm.dev"
         echo
-        echo "Usage: ${FILENAME} [parameter]"
+        echo "Usage: ${FILENAME} [parameters]"
         echo "Available parameters:"
         echo "  -c <timestamp>, --clip=<timestamp>               The timestamp of the clip to extract, in format: HH:mm:ss-HH:mm:ss."
         echo "                                                   Can be specified muliple times."
@@ -70,7 +70,7 @@ function help() {
         echo "  -h                                               Show slightly shorter help."
         echo "      --help                                       Show this help."
     elif [ "${1}" == 'short' ]; then
-        echo "Usage: ${FILENAME} [parameter]"
+        echo "Usage: ${FILENAME} [parameters]"
         echo "Available parameters:"
         echo "  -c, --clip=<time>            The timestamp of the clip to extract, in format: HH:mm:ss-HH:mm:ss."
         echo "  -o, --outputdirectory=<dir>  The directory in which the clips should be saved."
@@ -242,51 +242,37 @@ fi
 for clipTimes in "${TIMESTAMPSTOEXTRACT[@]}"; do
     CLIPNO=$(bc <<<"${CLIPNO}+1")
     IFS=- read -r clipStart clipEnd <<< "${clipTimes}"
-    if [[ "$(declare -p | grep -q TMPSTORAGEDIR)" -eq 0 ]] && [ "${TMPSTORAGEDIR}" != "" ] ; then
-        if [ ! "${SILENT}" == true ]; then
-            printf "%sUsing the temporary file was with the added keyframes that was created for %s.%s\n" "${TEXTFORMATTING[BRIGHT]}" "${INPUTFILEPATH}" "${TEXTFORMATTING[NORMAL]}"
+    if clipStartSeconds=$(timestampToSeconds "${clipStart}"); then
+        if [ "${QUIETOUTPUT}" == true ]; then
+            CLIPMESSAGE="Clip #${CLIPNO}: Will start at ${clipStartSeconds} seconds"
+        elif [ ! "${SILENT}" == true ]; then
+            echo "Clip #${CLIPNO}: will start at ${clipStartSeconds} seconds."
         fi
-        clipStartSeconds=$(timestampToSeconds "${clipStart}")
-        clipEndSeconds=$(timestampToSeconds "${clipEnd}")
-        clipDuration=$(bc <<< "(${clipEndSeconds} + 0.01) - ${clipStartSeconds}" | awk '{ printf "%.4f", $0 }')
-        if ffmpeg ${QUIETOUTPUT:+-loglevel warning} -hide_banner -ss "${clipStartSeconds}" -i "${TMPSTORAGEDIR}/$(basename "${INPUTFILEPATH}")" ${ENCODER:+-c:v $ENCODER} -t "${clipDuration}" "${OUTPUTDIR}/${CLIPNO}.mkv"; then
-            EXTRACTIONMESSAGES+=("Clip #${CLIPNO}: ${OUTPUTDIR}/${CLIPNO}.mkv was successfully extracted from ${INPUTFILEPATH}")
-        else
-            EXTRACTIONERRORMESSAGES+=("Clip #${CLIPNO}: There were one or more errors while attempting to extract ${OUTPUTDIR}/${CLIPNO}.mkv from ${INPUTFILEPATH}. ffmpeg returned an $? error code.")
+    fi
+    if clipEndSeconds=$(timestampToSeconds "${clipEnd}"); then
+        if [ "${QUIETOUTPUT}" == true ]; then
+            CLIPMESSAGE="${CLIPMESSAGE}, will end at ${clipEndSeconds} seconds"
+        elif [ ! "${SILENT}" == true ]; then
+            echo "Clip #${CLIPNO}: will end at ${clipEndSeconds} seconds."
+        fi
+    fi
+    if clipDuration=$(bc <<< "(${clipEndSeconds} + 0.01) - ${clipStartSeconds}" | awk '{ printf "%.4f", $0 }'); then
+        if [ "${QUIETOUTPUT}" == true ]; then
+            CLIPMESSAGE="${CLIPMESSAGE}, and be approximately $(date -d@"${clipDuration}" -u '+%-M minutes and %-S seconds') long."
+        elif [ ! "${SILENT}" == true ]; then
+            echo "Clip #${CLIPNO}: will be approximately $(date -d@"${clipDuration}" -u '+%-M minutes and %-S seconds') long."
+        fi
+    fi
+    if [ -n "${CLIPMESSAGE+x}" ] && [ ! "${SILENT}" == true ]; then
+        printf "%s\n" "${CLIPMESSAGE}"
+    fi
+
+    if ffmpeg ${QUIETOUTPUT:+-loglevel warning} -hide_banner -ss "${clipStartSeconds}" -i "${INPUTFILEPATH}" ${ENCODER:+-c:v $ENCODER} -t "${clipDuration}" "${OUTPUTDIR}/${CLIPNO}.mkv"; then
+        if [ ! "${SILENT}" == true ]; then
+            EXTRACTIONMESSAGES+=("Clip #${CLIPNO}: ${OUTPUTDIR}/${CLIPNO}.mkv was successfully extracted from \"$(basename "${INPUTFILEPATH}")\".")
         fi
     else
-        if clipStartSeconds=$(timestampToSeconds "${clipStart}"); then
-            if [ "${QUIETOUTPUT}" == true ]; then
-                CLIPMESSAGE="Clip #${CLIPNO}: Will start at ${clipStartSeconds} seconds"
-            elif [ ! "${SILENT}" == true ]; then
-                echo "Clip #${CLIPNO}: will start at ${clipStartSeconds} seconds."
-            fi
-        fi
-        if clipEndSeconds=$(timestampToSeconds "${clipEnd}"); then
-            if [ "${QUIETOUTPUT}" == true ]; then
-                CLIPMESSAGE="${CLIPMESSAGE}, will end at ${clipEndSeconds} seconds"
-            elif [ ! "${SILENT}" == true ]; then
-                echo "Clip #${CLIPNO}: will end at ${clipEndSeconds} seconds."
-            fi
-        fi
-        if clipDuration=$(bc <<< "(${clipEndSeconds} + 0.01) - ${clipStartSeconds}" | awk '{ printf "%.4f", $0 }'); then
-            if [ "${QUIETOUTPUT}" == true ]; then
-                CLIPMESSAGE="${CLIPMESSAGE}, and be approximately $(date -d@"${clipDuration}" -u '+%-M minutes and %-S seconds') long."
-            elif [ ! "${SILENT}" == true ]; then
-                echo "Clip #${CLIPNO}: will be approximately $(date -d@"${clipDuration}" -u '+%-M minutes and %-S seconds') long."
-            fi
-        fi
-        if [ -n "${CLIPMESSAGE+x}" ] && [ ! "${SILENT}" == true ]; then
-            printf "%s\n" "${CLIPMESSAGE}"
-        fi
-
-        if ffmpeg ${QUIETOUTPUT:+-loglevel warning} -hide_banner -ss "${clipStartSeconds}" -i "${INPUTFILEPATH}" ${ENCODER:+-c:v $ENCODER} -t "${clipDuration}" "${OUTPUTDIR}/${CLIPNO}.mkv"; then
-            if [ ! "${SILENT}" == true ]; then
-                EXTRACTIONMESSAGES+=("Clip #${CLIPNO}: ${OUTPUTDIR}/${CLIPNO}.mkv was successfully extracted from \"$(basename "${INPUTFILEPATH}")\".")
-            fi
-        else
-            EXTRACTIONERRORMESSAGES+=("Clip #${CLIPNO}: There one or more errors while attempting to extract ${OUTPUTDIR}/${CLIPNO}.mkv from \"$(basename "${INPUTFILEPATH}")\". ffmpeg returned an $? error code.")
-        fi
+        EXTRACTIONERRORMESSAGES+=("Clip #${CLIPNO}: There one or more errors while attempting to extract ${OUTPUTDIR}/${CLIPNO}.mkv from \"$(basename "${INPUTFILEPATH}")\". ffmpeg returned an $? error code.")
     fi
 done
 
