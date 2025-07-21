@@ -44,8 +44,8 @@ function help() {
         echo "${FILENAME} was created by Mirdarthos, originally cobbled together in about"
         echo "a week. I kept tinkering afterwards, though, so have lost track of time"
         echo "spent on it."
-        echo "Feel free to do with it what you want, except using to to harm or cause harm"
-        echo "to others. See also: https://firstdonoharm.dev"
+        echo "Feel free to do with it what you want, except using to harm or cause harm to"
+        echo "others. See also: https://firstdonoharm.dev"
         echo
         echo "Usage: ${FILENAME} [parameter]"
         echo "Available parameters:"
